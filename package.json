@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node --env-file=.env server.mjs",
+    "setup-agent": "node --env-file=.env agent/setup-agent.mjs",
     "check": "node scripts/check.mjs",
     "test": "node --test test/*.test.mjs",
     "risk-test": "node --env-file=.env scripts/risk-test.mjs",

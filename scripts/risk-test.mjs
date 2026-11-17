@@ -1,8 +1,9 @@
 // Stage 2 risk test: can the agent read an invoice off a shared screen?
 // Creates a throwaway PAL with Raven-2 screen perception, starts a short call,
-// and prints the link to join.
-import { tavus, requireEnv, saveState } from "./tavus.mjs";
+// and prints the link to join. (Passed on 17 Nov 2026: all five fields read correctly.)
+import { tavus, requireEnv, writeJson } from "../lib/tavus.mjs";
 
+const STATE = new URL("../.risk-test.json", import.meta.url);
 const FIELDS = [
   "invoice number",
   "invoice total",
@@ -50,7 +51,7 @@ const conversation = await tavus("POST", "/conversations", {
   },
 });
 
-await saveState({
+await writeJson(STATE, {
   pal_id: pal.pal_id,
   conversation_id: conversation.conversation_id,
   conversation_url: conversation.conversation_url,
