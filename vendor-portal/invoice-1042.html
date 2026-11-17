@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice INV-1042 · Oakridge Fastener Supply</title>
+<style>
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: #f2f4f7; color: #1d2430; }
+  .demo { background: #fff4d6; color: #6b4e00; text-align: center; font-size: 13px; padding: 6px; }
+  header { background: #1f3a5f; color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+  header .brand { font-size: 20px; font-weight: 600; }
+  header .user { font-size: 14px; opacity: .85; }
+  main { max-width: 860px; margin: 28px auto; background: #fff; border-radius: 10px; padding: 36px 44px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h1 { margin: 0 0 4px; font-size: 30px; }
+  .muted { color: #5b6573; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #5b6573; margin-bottom: 4px; }
+  .value { font-size: 18px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 16px; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #e3e7ec; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #5b6573; }
+  td.num, th.num { text-align: right; }
+  .total { display: flex; justify-content: flex-end; gap: 32px; margin-top: 18px; font-size: 22px; font-weight: 700; }
+  .remit { margin-top: 30px; padding: 18px 22px; background: #f6f8fb; border-radius: 8px; font-size: 17px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="demo">Fictional demo data for a Tavus take-home project. Not a real company or account.</div>
+  <header>
+    <div class="brand">Oakridge Fastener Supply · Customer Portal</div>
+    <div class="user">Signed in as Northwind Fabrication</div>
+  </header>
+  <main>
+    <h1>Invoice INV-1042</h1>
+    <div class="muted">Issued 3 November 2026 · Due 3 December 2026 · Net 30</div>
+
+    <div class="grid">
+      <div>
+        <div class="label">Billed to</div>
+        <div class="value">Northwind Fabrication</div>
+        <div class="muted">Customer account C-20774</div>
+      </div>
+      <div>
+        <div class="label">Vendor</div>
+        <div class="value">Oakridge Fastener Supply</div>
+        <div class="muted">Vendor account V-58213</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hex flange bolts, M10</td><td class="num">400</td><td class="num">$3.15</td><td class="num">$1,260.00</td></tr>
+        <tr><td>Stainless washers, M10</td><td class="num">1,200</td><td class="num">$0.85</td><td class="num">$1,020.00</td></tr>
+        <tr><td>Thread-locking compound, 50 ml</td><td class="num">24</td><td class="num">$22.50</td><td class="num">$540.00</td></tr>
+        <tr><td>Freight, palletized</td><td class="num">1</td><td class="num">$1,200.00</td><td class="num">$1,200.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="total"><span>Total due</span><span>$4,020.00</span></div>
+
+    <div class="remit">
+      <div class="label">Remit payment to</div>
+      Oakridge Fastener Supply<br>
+      Lakeshore Commerce Bank<br>
+      Account number 4402 1186 7316
+    </div>
+  </main>
+</body>
+</html>

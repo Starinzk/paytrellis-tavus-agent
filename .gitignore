@@ -1,0 +1,10 @@
+# Secrets: never commit the real .env
+.env
+.env.*
+!.env.example
+
+# Local run state
+.risk-test.json
+
+node_modules/
+.DS_Store

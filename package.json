@@ -1,0 +1,15 @@
+{
+  "name": "paytrellis-tavus-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tavus video agent that fixes incomplete payment requests for Paytrellis, a fictional payments company.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "risk-test": "node --env-file=.env scripts/risk-test.mjs",
+    "risk-test:results": "node --env-file=.env scripts/risk-test-results.mjs",
+    "risk-test:end": "node --env-file=.env scripts/risk-test-end.mjs"
+  }
+}
