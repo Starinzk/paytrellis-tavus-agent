@@ -3,10 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Paytrellis demo</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
 </head>
-<body style="font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; padding: 40px;">
-  <h1>Paytrellis demo</h1>
-  <p>Paytrellis is a fictional payments company. The call page and ops queue arrive in later pull requests.</p>
-  <p><a href="/api/requests">Payment requests (JSON)</a> · <a href="/vendor-portal/invoice-1042.html">Invoice INV-1042</a> · <a href="/vendor-portal/invoice-2177.html">Invoice INV-2177</a></p>
+<body>
+  <header class="topbar"><div class="brand">Paytrellis <small>a fictional payments company</small></div></header>
+  <main class="page">
+    <p class="muted">The full ops queue arrives in the next pull request. For now, pick a request to call about:</p>
+    <ul id="list"></ul>
+  </main>
+  <script type="module">
+    const requests = await (await fetch("/api/requests")).json();
+    document.getElementById("list").innerHTML = requests
+      .map((r) => {
+        const open = r.status === "needs_info" || r.status === "in_call";
+        const label = `${r.id} · ${r.customer.name} → ${r.vendor.name} (${r.status})`;
+        return `<li>${open ? `<a href="/call.html?request=${r.id}">${label}</a>` : label}</li>`;
+      })
+      .join("");
+  </script>
 </body>
 </html>

@@ -130,6 +130,15 @@ test("transcript route returns the conversation without system messages", async 
   assert.equal(body.perception, "Invoice INV-1042");
 });
 
+test("the call page and the Daily SDK it needs are served", async () => {
+  const page = await fetch(`${base}/call.html`);
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /\/vendor\/daily\.js/);
+  const sdk = await fetch(`${base}/vendor/daily.js`);
+  assert.equal(sdk.status, 200);
+  assert.match((await sdk.text()).slice(0, 400), /Daily/);
+});
+
 test("the vendor invoice pages are served", async () => {
   const res = await fetch(`${base}/vendor-portal/invoice-1042.html`);
   assert.equal(res.status, 200);

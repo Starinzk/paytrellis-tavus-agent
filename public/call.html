@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paytrellis · Payment request call</title>
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Paytrellis <small>a fictional payments company</small></div>
+    <nav><a href="/">Ops queue</a></nav>
+  </header>
+
+  <main class="call-layout">
+    <section class="stage" id="stage">
+      <div class="stage-placeholder" id="placeholder">
+        <h2>Payment request call</h2>
+        <p>Paige from Paytrellis will walk through the details that are holding up your payment. It takes about two minutes.</p>
+        <button class="btn" id="start" disabled>Start call</button>
+        <p class="muted" id="start-status"></p>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div>
+        <h1 id="title">Loading…</h1>
+        <div class="request-meta" id="meta"></div>
+      </div>
+
+      <div id="outcome" class="outcome" hidden><h2></h2><p></p></div>
+
+      <div>
+        <div class="progress" id="progress-label"></div>
+        <div class="progress-bar"><span id="progress-bar" style="width:0%"></span></div>
+      </div>
+
+      <ul class="checklist" id="checklist"></ul>
+
+      <div class="hint" id="share-hint">
+        <strong>Don't have the invoice details to hand?</strong> Paige can read them from your screen.
+        <ol>
+          <li>Log in to the vendor's portal yourself and open the invoice.</li>
+          <li>In the call, click <em>Share</em> and choose <em>Chrome Tab</em>.</li>
+          <li>Pick the invoice tab only, then tell Paige it's up.</li>
+        </ol>
+        <div id="demo-invoice" hidden style="margin-top:6px">Demo: <a target="_blank" rel="noopener">open the vendor's invoice</a></div>
+        <div style="margin-top:6px">Paige will never ask for passwords, card numbers or bank logins.</div>
+      </div>
+
+      <div>
+        <div class="muted" style="margin-bottom:4px">Activity</div>
+        <ul class="activity" id="activity"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/vendor/daily.js"></script>
+  <script type="module" src="/js/call.js"></script>
+</body>
+</html>

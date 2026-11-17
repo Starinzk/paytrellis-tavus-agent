@@ -9,7 +9,8 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 - Screen-reading risk test: passed (all five invoice fields read correctly).
 - Payment-request data, business rules and server: done.
 - Agent setup (prompt, tools, guardrails, objective, call creation): done.
-- Call page and ops queue: in progress.
+- Call page with live checklist: done.
+- Ops queue: in progress.
 
 ## How it's built
 
@@ -22,6 +23,8 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 | Agent definition | `agent/definitions.mjs` | Prompt, Raven-2 screen perception, tools, guardrails, objective |
 | Agent setup | `agent/setup-agent.mjs` | Pushes the definition to Tavus; safe to re-run |
 | Call context | `lib/call-context.mjs` | Per-call greeting and context built from the request |
+| Call page | `public/call.html`, `public/js/call.js` | Embeds the call (Daily Prebuilt, which has the screen-share button) and shows the live checklist |
+| Tool relay | `public/js/tool-relay.mjs` | Turns `conversation.tool_call` events into server calls and sends `conversation.tool_result` back |
 
 The rules that decide whether money moves are enforced in `lib/store.mjs`, not in the agent's prompt:
 
