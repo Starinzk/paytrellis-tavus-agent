@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice INV-2177 · Summit Medical Supply</title>
+<style>
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: #f2f4f7; color: #1d2430; }
+  .demo { background: #fff4d6; color: #6b4e00; text-align: center; font-size: 13px; padding: 6px; }
+  header { background: #1f3a5f; color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+  header .brand { font-size: 20px; font-weight: 600; }
+  header .user { font-size: 14px; opacity: .85; }
+  main { max-width: 860px; margin: 28px auto; background: #fff; border-radius: 10px; padding: 36px 44px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  h1 { margin: 0 0 4px; font-size: 30px; }
+  .muted { color: #5b6573; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #5b6573; margin-bottom: 4px; }
+  .value { font-size: 18px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 16px; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #e3e7ec; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #5b6573; }
+  td.num, th.num { text-align: right; }
+  .total { display: flex; justify-content: flex-end; gap: 32px; margin-top: 18px; font-size: 22px; font-weight: 700; }
+  .remit { margin-top: 30px; padding: 18px 22px; background: #f6f8fb; border-radius: 8px; font-size: 17px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="demo">Fictional demo data for a Tavus take-home project. Not a real company or account.</div>
+  <header>
+    <div class="brand">Summit Medical Supply · Customer Portal</div>
+    <div class="user">Signed in as Cedar Point Dental Group</div>
+  </header>
+  <main>
+    <h1>Invoice INV-2177</h1>
+    <div class="muted">Issued 6 November 2026 · Due 6 December 2026 · Net 30</div>
+
+    <div class="grid">
+      <div>
+        <div class="label">Billed to</div>
+        <div class="value">Cedar Point Dental Group</div>
+        <div class="muted">Customer account C-31508</div>
+      </div>
+      <div>
+        <div class="label">Vendor</div>
+        <div class="value">Summit Medical Supply</div>
+        <div class="muted">Vendor account V-90412</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nitrile exam gloves, box of 200</td><td class="num">40</td><td class="num">$12.85</td><td class="num">$514.00</td></tr>
+        <tr><td>Self-seal sterilization pouches, box of 200</td><td class="num">30</td><td class="num">$18.90</td><td class="num">$567.00</td></tr>
+        <tr><td>Disposable prophy angles, case of 100</td><td class="num">12</td><td class="num">$64.20</td><td class="num">$770.40</td></tr>
+        <tr><td>Composite resin kit</td><td class="num">6</td><td class="num">$169.00</td><td class="num">$1,014.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="total"><span>Total due</span><span>$2,865.40</span></div>
+
+    <div class="remit">
+      <div class="label">Remit payment to</div>
+      <strong>Our banking details have changed. Please update your records.</strong><br>
+      Summit Medical Supply<br>
+      Pinecrest Federal Credit Union<br>
+      Account number 6604 9917 2285
+    </div>
+  </main>
+</body>
+</html>

@@ -6,7 +6,24 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 
 ## Status
 
-Stage 2: screen-reading risk test. The full app comes next.
+- Screen-reading risk test: passed (all five invoice fields read correctly).
+- Payment-request data, business rules and server: done.
+- Agent setup, call page and ops queue: in progress.
+
+## How it's built
+
+| Part | File | Role |
+| --- | --- | --- |
+| Payment requests | `data/requests.json` | Eight fictional requests, each with one or two flawed fields |
+| Store | `lib/store.mjs` | Stand-in for Paytrellis's API, and where the business rules live |
+| Server | `lib/app.mjs`, `server.mjs` | Serves the pages and runs the agent's tool calls against the store |
+| Vendor portal | `vendor-portal/` | Fictional invoices the customer shares on screen |
+
+The rules that decide whether money moves are enforced in `lib/store.mjs`, not in the agent's prompt:
+
+- A request can't complete while any field is missing or flagged.
+- A remit-to bank or account that differs from the vendor's details on file is marked `changed`, and the request can then only go to an ops staffer for review.
+- Closed requests can't be changed by the agent.
 
 ## Setup
 
@@ -15,6 +32,13 @@ Requires Node.js 20.6 or newer (`node -v` to check).
 ```bash
 cp .env.example .env
 # open .env and paste your Tavus API key
+```
+
+## Run the app
+
+```bash
+npm install
+npm start          # http://localhost:3000
 ```
 
 ## Checks

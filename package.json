@@ -8,10 +8,14 @@
     "node": ">=20.6"
   },
   "scripts": {
+    "start": "node --env-file=.env server.mjs",
     "check": "node scripts/check.mjs",
     "test": "node --test test/*.test.mjs",
     "risk-test": "node --env-file=.env scripts/risk-test.mjs",
     "risk-test:results": "node --env-file=.env scripts/risk-test-results.mjs",
     "risk-test:end": "node --env-file=.env scripts/risk-test-end.mjs"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
   }
 }
