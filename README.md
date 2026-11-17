@@ -17,6 +17,15 @@ cp .env.example .env
 # open .env and paste your Tavus API key
 ```
 
+## Checks
+
+```bash
+npm run check   # syntax-checks every script
+npm test        # runs the tests in test/
+```
+
+Both run automatically on every pull request (`.github/workflows/ci.yml`).
+
 ## Screen-reading test
 
 ```bash
