@@ -7,8 +7,36 @@ import * as store from "../lib/store.mjs";
 let server;
 let base;
 
+// Stand-in for the Tavus API: records requests and returns canned responses.
+const tavusCalls = [];
+async function fakeTavus(method, path, body) {
+  tavusCalls.push({ method, path, body });
+  if (method === "POST" && path === "/conversations") {
+    return { conversation_id: "c-test", conversation_url: "https://tavus.daily.co/c-test" };
+  }
+  if (method === "GET" && path.startsWith("/conversations/c-test")) {
+    return {
+      status: "ended",
+      events: [
+        {
+          event_type: "application.transcription_ready",
+          properties: {
+            transcript: [
+              { role: "system", content: "hidden" },
+              { role: "assistant", content: "Hi Dana" },
+              { role: "user", content: "Hi" },
+            ],
+          },
+        },
+        { event_type: "application.perception_analysis", properties: { analysis: "Invoice INV-1042" } },
+      ],
+    };
+  }
+  return {};
+}
+
 before(async () => {
-  server = createApp().listen(0);
+  server = createApp({ tavus: fakeTavus, getAgent: async () => ({ pal_id: "p-test" }) }).listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
   base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -60,6 +88,46 @@ test("reset restores the starting data", async () => {
   await post("/api/reset", {});
   const res = await fetch(`${base}/api/requests/PR-1008`);
   assert.equal((await res.json()).status, "in_review");
+});
+
+test("starting a call creates a Tavus conversation with the request's greeting and context", async () => {
+  tavusCalls.length = 0;
+  const res = await post("/api/requests/PR-1001/call", {});
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).conversation_url, "https://tavus.daily.co/c-test");
+
+  const { body } = tavusCalls.find((c) => c.path === "/conversations");
+  assert.equal(body.pal_id, "p-test");
+  assert.match(body.custom_greeting, /^Hi Dana/);
+  assert.match(body.conversational_context, /PR-1001/);
+  assert.equal(body.properties.max_call_duration, 600);
+
+  const request = store.get("PR-1001");
+  assert.equal(request.status, "in_call");
+  assert.equal(request.conversationId, "c-test");
+});
+
+test("a closed request can't start a call", async () => {
+  const res = await post("/api/requests/PR-1007/call", {});
+  assert.equal(res.status, 422);
+});
+
+test("leaving a call without resolving it puts the request back in the queue", async () => {
+  await post("/api/requests/PR-1001/call", {});
+  tavusCalls.length = 0;
+  const res = await post("/api/requests/PR-1001/end-call", {});
+  assert.equal((await res.json()).status, "needs_info");
+  assert.ok(tavusCalls.some((c) => c.path === "/conversations/c-test/end"));
+});
+
+test("transcript route returns the conversation without system messages", async () => {
+  await post("/api/requests/PR-1001/call", {});
+  const body = await (await fetch(`${base}/api/requests/PR-1001/transcript`)).json();
+  assert.deepEqual(
+    body.transcript.map((t) => t.role),
+    ["assistant", "user"],
+  );
+  assert.equal(body.perception, "Invoice INV-1042");
 });
 
 test("the vendor invoice pages are served", async () => {

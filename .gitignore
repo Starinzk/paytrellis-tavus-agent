@@ -5,6 +5,7 @@
 
 # Local run state
 .risk-test.json
+.agent.json
 
 node_modules/
 .DS_Store
