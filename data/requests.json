@@ -1,0 +1,140 @@
+[
+  {
+    "id": "PR-1001",
+    "submittedAt": "2026-11-12T16:20:00Z",
+    "customer": { "name": "Northwind Fabrication", "contact": "Dana Reyes" },
+    "vendor": {
+      "name": "Oakridge Fastener Supply",
+      "remitOnFile": { "bank": "Lakeshore Commerce Bank", "account": "4402 1186 7316" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": null, "status": "missing", "note": "Left blank on the request" },
+      "amount": { "value": 4200.0, "status": "suspect", "note": "Doesn't match any open invoice from this vendor" },
+      "vendorAccount": { "value": "V-58213", "status": "ok" },
+      "remitBank": { "value": "Lakeshore Commerce Bank", "status": "ok" },
+      "remitAccount": { "value": "4402 1186 7316", "status": "ok" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1002",
+    "submittedAt": "2026-11-13T18:05:00Z",
+    "customer": { "name": "Cedar Point Dental Group", "contact": "Marcus Lee" },
+    "vendor": {
+      "name": "Summit Medical Supply",
+      "remitOnFile": { "bank": "First Valley Bank", "account": "7710 3349 0052" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "INV-2177", "status": "ok" },
+      "amount": { "value": 2865.4, "status": "ok" },
+      "vendorAccount": { "value": null, "status": "missing", "note": "Left blank on the request" },
+      "remitBank": { "value": "First Valley Bank", "status": "ok" },
+      "remitAccount": { "value": "7710 3349 0052", "status": "ok" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1003",
+    "submittedAt": "2026-11-14T15:40:00Z",
+    "customer": { "name": "Harbor Lane Bakery", "contact": "Priya Shah" },
+    "vendor": {
+      "name": "Golden Mill Flour Co.",
+      "remitOnFile": { "bank": "Lakeshore Commerce Bank", "account": "5190 2283 6604" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "GM-30418", "status": "ok" },
+      "amount": { "value": 1312.75, "status": "ok" },
+      "vendorAccount": { "value": "V-41927", "status": "suspect", "note": "Not a known account for this vendor; possible transposed digits" },
+      "remitBank": { "value": "Lakeshore Commerce Bank", "status": "ok" },
+      "remitAccount": { "value": "5190 2283 6604", "status": "ok" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1004",
+    "submittedAt": "2026-11-14T20:10:00Z",
+    "customer": { "name": "Ridgeview Property Management", "contact": "Tom Becker" },
+    "vendor": {
+      "name": "Apex Elevator Services",
+      "remitOnFile": { "bank": "Cascade National Bank", "account": "3021 5567 1180" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "AES-7731", "status": "ok" },
+      "amount": { "value": null, "status": "missing", "note": "Left blank on the request" },
+      "vendorAccount": { "value": "V-66102", "status": "ok" },
+      "remitBank": { "value": "Cascade National Bank", "status": "ok" },
+      "remitAccount": { "value": "3021 5567 1180", "status": "ok" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1005",
+    "submittedAt": "2026-11-15T17:25:00Z",
+    "customer": { "name": "Bluebird Pediatrics", "contact": "Hannah Ortiz" },
+    "vendor": {
+      "name": "CleanSweep Janitorial",
+      "remitOnFile": { "bank": "First Valley Bank", "account": "6638 0012 9945" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "INV-88O1", "status": "suspect", "note": "Contains the letter O where a zero is expected" },
+      "amount": { "value": 640.0, "status": "ok" },
+      "vendorAccount": { "value": "V-20388", "status": "ok" },
+      "remitBank": { "value": "First Valley Bank", "status": "ok" },
+      "remitAccount": { "value": "6638 0012 9945", "status": "ok" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1006",
+    "submittedAt": "2026-11-16T14:50:00Z",
+    "customer": { "name": "Granite & Co. Builders", "contact": "Luis Moreno" },
+    "vendor": {
+      "name": "Delta Lumber Yard",
+      "remitOnFile": { "bank": "Cascade National Bank", "account": "9402 7731 2258" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "DLY-55120", "status": "ok" },
+      "amount": { "value": 18450.0, "status": "ok" },
+      "vendorAccount": { "value": "V-73015", "status": "ok" },
+      "remitBank": { "value": null, "status": "missing", "note": "Left blank on the request" },
+      "remitAccount": { "value": null, "status": "missing", "note": "Left blank on the request" }
+    },
+    "status": "needs_info"
+  },
+  {
+    "id": "PR-1007",
+    "submittedAt": "2026-11-11T19:30:00Z",
+    "customer": { "name": "Sunset Coffee Roasters", "contact": "Kim Nguyen" },
+    "vendor": {
+      "name": "Pacific Packaging",
+      "remitOnFile": { "bank": "Lakeshore Commerce Bank", "account": "2276 4410 8831" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "PP-11902", "status": "confirmed" },
+      "amount": { "value": 975.0, "status": "ok" },
+      "vendorAccount": { "value": "V-30551", "status": "ok" },
+      "remitBank": { "value": "Lakeshore Commerce Bank", "status": "ok" },
+      "remitAccount": { "value": "2276 4410 8831", "status": "ok" }
+    },
+    "status": "completed",
+    "writeBack": { "result": "success", "at": "2026-11-11T21:02:00Z" }
+  },
+  {
+    "id": "PR-1008",
+    "submittedAt": "2026-11-12T22:15:00Z",
+    "customer": { "name": "Maple Street Dental", "contact": "Grace Kim" },
+    "vendor": {
+      "name": "BrightSmile Lab",
+      "remitOnFile": { "bank": "First Valley Bank", "account": "5512 0098 4471" }
+    },
+    "fields": {
+      "invoiceNumber": { "value": "BSL-4420", "status": "ok" },
+      "amount": { "value": 3120.0, "status": "confirmed" },
+      "vendorAccount": { "value": "V-12884", "status": "ok" },
+      "remitBank": { "value": "Harborview Credit Union", "status": "changed", "note": "On file: First Valley Bank" },
+      "remitAccount": { "value": "8820 1147 3306", "status": "changed", "note": "On file: 5512 0098 4471" }
+    },
+    "status": "in_review",
+    "reviewReason": "Remit-to details on the invoice differ from the vendor's details on file"
+  }
+]
