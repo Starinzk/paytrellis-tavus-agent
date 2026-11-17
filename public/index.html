@@ -2,25 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Paytrellis demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paytrellis · Ops queue</title>
 <link rel="stylesheet" href="/css/app.css">
 <link rel="icon" href="data:,">
 </head>
 <body>
-  <header class="topbar"><div class="brand">Paytrellis <small>a fictional payments company</small></div></header>
+  <header class="topbar">
+    <div class="brand">Paytrellis <small>a fictional payments company</small></div>
+    <nav><button class="btn small secondary" id="reset">Reset demo data</button></nav>
+  </header>
+
   <main class="page">
-    <p class="muted">The full ops queue arrives in the next pull request. For now, pick a request to call about:</p>
-    <ul id="list"></ul>
+    <div class="page-head">
+      <div>
+        <h1>Payment requests on hold</h1>
+        <div class="muted" id="counts"></div>
+      </div>
+      <div class="muted">Updates every few seconds</div>
+    </div>
+
+    <div class="error-box" id="error" hidden></div>
+
+    <div class="card">
+      <table class="queue">
+        <thead>
+          <tr><th>Request</th><th>Customer</th><th>Amount</th><th>Status</th><th>Problems and changes</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
   </main>
-  <script type="module">
-    const requests = await (await fetch("/api/requests")).json();
-    document.getElementById("list").innerHTML = requests
-      .map((r) => {
-        const open = r.status === "needs_info" || r.status === "in_call";
-        const label = `${r.id} · ${r.customer.name} → ${r.vendor.name} (${r.status})`;
-        return `<li>${open ? `<a href="/call.html?request=${r.id}">${label}</a>` : label}</li>`;
-      })
-      .join("");
-  </script>
+
+  <script type="module" src="/js/queue-page.js"></script>
 </body>
 </html>
