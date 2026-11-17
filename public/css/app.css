@@ -58,6 +58,7 @@ a { color: var(--brand); }
 .pill.neutral { color: var(--neutral); background: var(--neutral-bg); }
 
 .btn { appearance: none; border: 0; border-radius: 8px; padding: 10px 16px; font-size: 15px; font-weight: 600; cursor: pointer; background: var(--brand); color: #fff; }
+a.btn { text-decoration: none; display: inline-block; }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn.secondary { background: var(--neutral-bg); color: var(--ink); }
 .btn.small { padding: 6px 10px; font-size: 13px; }

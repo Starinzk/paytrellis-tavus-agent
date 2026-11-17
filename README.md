@@ -10,7 +10,7 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 - Payment-request data, business rules and server: done.
 - Agent setup (prompt, tools, guardrails, objective, call creation): done.
 - Call page with live checklist: done.
-- Ops queue: in progress.
+- Ops queue with review, approve/reject and transcripts: done.
 
 ## How it's built
 
@@ -25,6 +25,7 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 | Call context | `lib/call-context.mjs` | Per-call greeting and context built from the request |
 | Call page | `public/call.html`, `public/js/call.js` | Embeds the call (Daily Prebuilt, which has the screen-share button) and shows the live checklist |
 | Tool relay | `public/js/tool-relay.mjs` | Turns `conversation.tool_call` events into server calls and sends `conversation.tool_result` back |
+| Ops queue | `public/index.html`, `public/js/queue.mjs` | Requests on hold, what changed on each call, approve/reject for reviews, transcripts |
 
 The rules that decide whether money moves are enforced in `lib/store.mjs`, not in the agent's prompt:
 
@@ -46,7 +47,7 @@ cp .env.example .env
 ```bash
 npm install
 npm run setup-agent   # once, and again after changing agent/definitions.mjs
-npm start             # http://localhost:3000
+npm start             # http://localhost:3000 (ops queue); calls open from there
 ```
 
 `setup-agent` creates three guardrails, one objective, three tools and the PAL in your Tavus account and records their IDs in `.agent.json` (git-ignored). Re-running it reuses the guardrails and objective, updates the tools in place, and replaces the PAL so prompt changes take effect.
