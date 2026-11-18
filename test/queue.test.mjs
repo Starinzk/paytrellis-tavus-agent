@@ -101,8 +101,10 @@ test("closed requests show the portal write-back result", () => {
   assert.match(html, /Written back to the portal as <strong>failed/);
 });
 
-test("open requests link to the call page", () => {
+test("open requests offer a call link to paste into a calendar invite", () => {
   const html = renderQueue(store.list(), { tab: "info", expanded: new Set(["PR-1001"]) });
+  assert.match(html, /data-action="copy-link" data-id="PR-1001"[^>]*>Copy call link</);
+  assert.match(html, /Paste this link into a calendar invite to the customer/);
   assert.match(html, /href="\/call\.html\?request=PR-1001"/);
 });
 

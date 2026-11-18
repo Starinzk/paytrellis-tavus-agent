@@ -102,8 +102,22 @@ document.addEventListener("click", (event) => {
     decide(id, action);
   } else if (action === "transcript") {
     loadTranscript(id);
+  } else if (action === "copy-link") {
+    copyCallLink(el, id);
   }
 });
+
+// The link the employee pastes into a calendar invite to the customer.
+async function copyCallLink(button, id) {
+  const url = `${location.origin}/call.html?request=${encodeURIComponent(id)}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    button.textContent = "Link copied";
+    setTimeout(() => (button.textContent = "Copy call link"), 2000);
+  } catch {
+    window.prompt("Copy this link into the calendar invite:", url);
+  }
+}
 
 // Ticking the verification box enables Approve without a redraw.
 document.addEventListener("change", (event) => {

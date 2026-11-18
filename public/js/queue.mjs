@@ -194,7 +194,8 @@ function detailPanels(row, ui) {
   }
   if (row.canCall) {
     right.push(
-      `<div class="panel"><h3>Next step</h3><p style="margin:0 0 10px">Send ${escape(row.contact)} a link to a short video call with Paige.</p><a class="btn small" href="/call.html?request=${id}">Open call page</a></div>`,
+      `<div class="panel"><h3>Next step</h3><p style="margin:0 0 10px">Set up a short video call between ${escape(row.contact)} and Paige. Paste this link into a calendar invite to the customer.</p>
+        <div class="decision"><button class="btn small" data-action="copy-link" data-id="${id}" data-focus="copy-${id}">Copy call link</button><a class="btn small secondary" href="/call.html?request=${id}" target="_blank" rel="noopener">Preview</a></div></div>`,
     );
   }
   return `<div class="detail-grid"><div>${left.join("")}</div><div>${right.join("")}</div></div>`;
