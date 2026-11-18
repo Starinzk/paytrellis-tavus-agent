@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handleToolCall, isToolCall } from "../public/js/tool-relay.mjs";
-import { checklistRows, progress, outcome, renderChecklist } from "../public/js/checklist.mjs";
+import { ledgerRows, progress, outcome, renderLedger } from "../public/js/checklist.mjs";
 import * as store from "../lib/store.mjs";
 
 const toolCall = (name, args, extra = {}) => ({
@@ -73,35 +73,54 @@ test("server errors and bad input come back as status error, never silence", asy
   assert.match(sent[1].properties.output, /Unknown tool wire_money/);
 });
 
-test("checklist shows flagged fields, then confirmed values with the old one struck through", () => {
+test("ledger compares the request with what was confirmed, field by field", () => {
   store.reset();
-  let rows = checklistRows(store.get("PR-1001"));
-  assert.equal(rows.find((r) => r.key === "invoiceNumber").statusLabel, "Missing");
-  assert.equal(rows.find((r) => r.key === "amount").value, "$4,200.00");
+  let rows = ledgerRows(store.get("PR-1001"));
+  const invoice = rows.find((r) => r.key === "invoiceNumber");
+  assert.equal(invoice.state, "needs");
+  assert.equal(invoice.tag.label, "Missing");
+  assert.equal(invoice.requested, null);
   assert.deepEqual(progress(store.get("PR-1001")), { done: 0, total: 2 });
 
   store.updateField("PR-1001", "amount", "4020");
-  rows = checklistRows(store.get("PR-1001"));
+  rows = ledgerRows(store.get("PR-1001"));
   const amount = rows.find((r) => r.key === "amount");
-  assert.equal(amount.statusLabel, "Confirmed");
-  assert.equal(amount.previous, "$4,200.00");
-  assert.equal(amount.value, "$4,020.00");
+  assert.equal(amount.state, "locked");
+  assert.equal(amount.requested, "$4,200.00");
+  assert.equal(amount.confirmed, "$4,020.00");
+  assert.equal(amount.corrected, true);
   assert.deepEqual(progress(store.get("PR-1001")), { done: 1, total: 2 });
 });
 
-test("a changed remit-to shows as needing review, and the outcome explains it", () => {
+test("unflagged fields need no action and don't count toward progress", () => {
   store.reset();
-  store.updateField("PR-1002", "remitBank", "Pinecrest Federal Credit Union");
-  const row = checklistRows(store.get("PR-1002")).find((r) => r.key === "remitBank");
-  assert.equal(row.tone, "review");
-  store.sendToReview("PR-1002", "Bank details changed");
-  assert.equal(outcome(store.get("PR-1002")).title, "Sent to a Paytrellis team member");
+  const vendor = ledgerRows(store.get("PR-1001")).find((r) => r.key === "vendorAccount");
+  assert.equal(vendor.state, "ok");
+  assert.equal(vendor.tag, null);
+  assert.match(renderLedger(store.get("PR-1001")), /No change needed/);
 });
 
-test("checklist HTML escapes values", () => {
+test("a changed remit-to shows as 'team will verify', and the outcome explains what happens next", () => {
+  store.reset();
+  store.updateField("PR-1002", "remitBank", "Pinecrest Federal Credit Union");
+  const row = ledgerRows(store.get("PR-1002")).find((r) => r.key === "remitBank");
+  assert.equal(row.state, "flagged");
+  assert.equal(row.tag.label, "Team will verify");
+  assert.equal(outcome(store.get("PR-1002")).tone, "hold");
+  store.sendToReview("PR-1002", "Bank details changed");
+  assert.match(outcome(store.get("PR-1002")).title, /team member will verify/);
+});
+
+test("the field that just changed is marked so it can highlight", () => {
+  store.reset();
+  store.updateField("PR-1001", "invoiceNumber", "INV-1042");
+  assert.match(renderLedger(store.get("PR-1001"), new Set(["invoiceNumber"])), /class="locked just-locked" data-field="invoiceNumber"/);
+});
+
+test("ledger HTML escapes values", () => {
   store.reset();
   store.updateField("PR-1001", "invoiceNumber", "<img src=x onerror=alert(1)>");
-  const html = renderChecklist(store.get("PR-1001"));
+  const html = renderLedger(store.get("PR-1001"));
   assert.ok(!html.includes("<img"));
   assert.ok(html.includes("&lt;img"));
 });

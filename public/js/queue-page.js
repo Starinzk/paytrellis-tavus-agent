@@ -1,15 +1,24 @@
-// Ops queue page: lists payment requests, refreshes every few seconds so calls
-// show up live, and lets a staffer approve or reject requests sent to review.
-import { renderQueue, renderTranscript, counts } from "./queue.mjs";
+// Ops queue page. Polls every few seconds so calls show up live, but only redraws
+// when the data actually changed, and puts keyboard focus back where it was.
+import { renderQueue, renderTabs, renderTranscript, counts } from "./queue.mjs";
 
 const $ = (id) => document.getElementById(id);
-const openTranscripts = new Set();
-const transcriptCache = new Map();
+
+const ui = {
+  tab: null,
+  expanded: new Set(),
+  verified: new Set(),
+  notes: new Map(),
+  transcripts: new Map(),
+  errors: new Map(),
+};
+let requests = [];
+let lastSignature = "";
 
 async function api(path, options = {}) {
   const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json" } });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error ?? `Request failed (${res.status})`);
+  if (!res.ok) throw new Error(body.error ?? `The server returned ${res.status}.`);
   return body;
 }
 
@@ -18,58 +27,119 @@ function showError(message) {
   $("error").textContent = message ?? "";
 }
 
-async function load() {
+// Redraw, then restore focus (and the caret in a text box) to the same control.
+function draw() {
+  const active = document.activeElement;
+  const focusKey = active?.dataset?.focus;
+  const caret = active?.selectionStart;
+
+  $("tabs").innerHTML = renderTabs(requests, ui.tab);
+  $("rows").innerHTML = renderQueue(requests, ui);
+
+  if (focusKey) {
+    const el = document.querySelector(`[data-focus="${CSS.escape(focusKey)}"]`);
+    el?.focus();
+    if (el && caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret);
+  }
+}
+
+async function load({ force = false } = {}) {
   try {
-    const requests = await api("/api/requests");
-    const c = counts(requests);
-    $("counts").textContent = `${c.review} need review · ${c.open} need info · ${c.done} closed`;
-    $("rows").innerHTML = renderQueue(requests, openTranscripts);
-    for (const id of openTranscripts) {
-      const slot = $(`transcript-${id}`);
-      if (slot && transcriptCache.has(id)) slot.innerHTML = transcriptCache.get(id);
+    requests = await api("/api/requests");
+    if (!ui.tab) ui.tab = location.hash.slice(1) || (counts(requests).review ? "review" : "info");
+    const signature = JSON.stringify(requests);
+    if (force || signature !== lastSignature) {
+      lastSignature = signature;
+      draw();
     }
+    $("updated").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })}`;
     showError(null);
   } catch (err) {
-    showError(`Couldn't load the queue: ${err.message}`);
+    showError(`The queue couldn't refresh: ${err.message} It will retry automatically.`);
   }
 }
 
-async function toggleTranscript(id) {
-  if (openTranscripts.has(id)) {
-    openTranscripts.delete(id);
-    return load();
-  }
-  openTranscripts.add(id);
-  transcriptCache.set(id, `<div class="transcript muted">Loading transcript…</div>`);
-  await load();
+async function decide(id, decision) {
+  ui.errors.delete(id);
   try {
-    transcriptCache.set(id, renderTranscript(await api(`/api/requests/${id}/transcript`)));
+    await api(`/api/requests/${id}/decision`, {
+      method: "POST",
+      body: JSON.stringify({ decision, note: ui.notes.get(id) ?? "", verifiedBankChange: ui.verified.has(id) }),
+    });
+    ui.notes.delete(id);
+    ui.verified.delete(id);
   } catch (err) {
-    transcriptCache.set(id, `<div class="transcript muted">${err.message}</div>`);
+    ui.errors.set(id, err.message);
   }
-  await load();
+  await load({ force: true });
 }
 
-$("rows").addEventListener("click", async (event) => {
-  const button = event.target.closest("button[data-action]");
-  if (!button) return;
-  const { action, id } = button.dataset;
-  button.disabled = true;
+async function loadTranscript(id) {
+  ui.transcripts.set(id, `<p class="muted" style="margin:0">Loading transcript…</p>`);
+  draw();
   try {
-    if (action === "transcript") return await toggleTranscript(id);
-    await api(`/api/requests/${id}/decision`, { method: "POST", body: JSON.stringify({ decision: action }) });
-    await load();
+    ui.transcripts.set(id, renderTranscript(await api(`/api/requests/${id}/transcript`)));
   } catch (err) {
-    showError(err.message);
-    button.disabled = false;
+    ui.transcripts.set(id, `<p class="muted" style="margin:0">${err.message}</p>`);
+  }
+  draw();
+}
+
+document.addEventListener("click", (event) => {
+  const el = event.target.closest("[data-action]");
+  if (!el) return;
+  const { action, id, tab } = el.dataset;
+  if (action === "tab") {
+    ui.tab = tab;
+    history.replaceState(null, "", `#${tab}`);
+    draw();
+  } else if (action === "toggle") {
+    if (ui.expanded.has(id)) ui.expanded.delete(id);
+    else ui.expanded.add(id);
+    draw();
+  } else if (action === "approve" || action === "reject") {
+    el.disabled = true;
+    decide(id, action);
+  } else if (action === "transcript") {
+    loadTranscript(id);
+  } else if (action === "copy-link") {
+    copyCallLink(el, id);
   }
 });
 
+// The link the employee pastes into a calendar invite to the customer.
+async function copyCallLink(button, id) {
+  const url = `${location.origin}/call.html?request=${encodeURIComponent(id)}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    button.textContent = "Link copied";
+    setTimeout(() => (button.textContent = "Copy call link"), 2000);
+  } catch {
+    window.prompt("Copy this link into the calendar invite:", url);
+  }
+}
+
+// Ticking the verification box enables Approve without a redraw.
+document.addEventListener("change", (event) => {
+  const el = event.target;
+  if (el.dataset?.action !== "verify") return;
+  if (el.checked) ui.verified.add(el.dataset.id);
+  else ui.verified.delete(el.dataset.id);
+  const approve = document.querySelector(`[data-action="approve"][data-id="${CSS.escape(el.dataset.id)}"]`);
+  if (approve) approve.disabled = !el.checked;
+});
+
+document.addEventListener("input", (event) => {
+  const el = event.target;
+  if (el.dataset?.action === "note") ui.notes.set(el.dataset.id, el.value);
+});
+
 $("reset").addEventListener("click", async () => {
-  openTranscripts.clear();
-  transcriptCache.clear();
+  if (!confirm("Reset all demo payment requests to their starting state?")) return;
+  for (const key of ["expanded", "verified"]) ui[key].clear();
+  for (const key of ["notes", "transcripts", "errors"]) ui[key].clear();
   await api("/api/reset", { method: "POST" });
-  await load();
+  await load({ force: true });
 });
 
 load();

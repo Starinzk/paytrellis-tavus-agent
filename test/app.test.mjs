@@ -77,14 +77,22 @@ test("unknown tools are rejected", async () => {
   assert.equal((await post("/api/requests/PR-1001/tools/wire_money", {})).status, 404);
 });
 
-test("ops decision route approves a request in review", async () => {
-  const res = await post("/api/requests/PR-1008/decision", { decision: "approve" });
+test("ops decision route approves a bank change only once it's marked verified", async () => {
+  let res = await post("/api/requests/PR-1008/decision", { decision: "approve" });
+  assert.equal(res.status, 422);
+  res = await post("/api/requests/PR-1008/decision", { decision: "approve", verifiedBankChange: true });
   assert.equal(res.status, 200);
   assert.equal((await res.json()).writeBack.result, "success");
 });
 
+test("the brand font is served", async () => {
+  const css = await fetch(`${base}/vendor/font/index.css`);
+  assert.equal(css.status, 200);
+  assert.match(await css.text(), /Schibsted Grotesk Variable/);
+});
+
 test("reset restores the starting data", async () => {
-  await post("/api/requests/PR-1008/decision", { decision: "approve" });
+  await post("/api/requests/PR-1008/decision", { decision: "reject" });
   await post("/api/reset", {});
   const res = await fetch(`${base}/api/requests/PR-1008`);
   assert.equal((await res.json()).status, "in_review");

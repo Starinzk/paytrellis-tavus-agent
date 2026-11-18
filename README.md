@@ -61,12 +61,14 @@ npm start             # http://localhost:3000 (ops queue); calls open from there
 - **Tool calls carry no request ID.** The call page knows which request it's for, so the agent can only ever change the request it's calling about.
 - **Perception:** Raven-2 with screen questions about invoice fields. The post-call report is scoped to the invoice, because in the risk test the default report also described the person and their surroundings.
 - **Guardrails:** no credentials, no claiming a payment is complete unless the server said so, stay on task.
+- **Approving new bank details** requires the ops staffer to confirm they verified them with the vendor on a phone number already on file. The server enforces this, not just the page.
 - **Calls** are capped at 10 minutes with short idle timeouts to protect Tavus minutes.
 
 ## Checks
 
 ```bash
 npm run check   # syntax-checks every script
+npm run lint    # ESLint
 npm test        # runs the tests in test/
 ```
 

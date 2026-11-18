@@ -58,8 +58,20 @@ test("send to review, then an ops decision writes back success or failed", () =>
   assert.equal(store.get("PR-1002").status, "rejected");
   assert.equal(store.get("PR-1002").writeBack.result, "failed");
 
-  const approved = store.decide("PR-1008", "approve");
+  const approved = store.decide("PR-1008", "approve", "", { verifiedBankChange: true });
   assert.equal(approved.writeBack.result, "success");
+});
+
+test("approving new bank details requires confirming they were verified with the vendor", () => {
+  assert.throws(() => store.decide("PR-1008", "approve"), /verified the new bank details/);
+  assert.equal(store.get("PR-1008").status, "in_review");
+  store.decide("PR-1008", "approve", "Called vendor on number from 2024 contract", { verifiedBankChange: true });
+  assert.equal(store.get("PR-1008").history.at(-1).verifiedBankChange, true);
+});
+
+test("a review without a bank change can be approved without that step", () => {
+  store.sendToReview("PR-1001", "Customer says $4,200 includes a late fee");
+  assert.equal(store.decide("PR-1001", "approve").status, "approved");
 });
 
 test("closed requests can't be changed by the agent", () => {
