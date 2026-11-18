@@ -64,6 +64,20 @@ npm start             # http://localhost:3000 (ops queue); calls open from there
 - **Approving new bank details** requires the ops staffer to confirm they verified them with the vendor on a phone number already on file. The server enforces this, not just the page.
 - **Calls** are capped at 10 minutes with short idle timeouts to protect Tavus minutes.
 
+## Hosted demo
+
+The same app runs on a host such as Railway (`railway.json` sets the start command and health check). Settings come from the platform instead of local files:
+
+| Setting | Purpose |
+| --- | --- |
+| `TAVUS_API_KEY` | Tavus API key |
+| `TAVUS_PAL_ID` | The agent's `pal_id` from your local `.agent.json` (run `npm run setup-agent` first) |
+| `DEMO_ACCESS_CODE` | Code reviewers enter before starting a call, so a public link can't run up Tavus minutes |
+| `MAX_CALLS_PER_HOUR` | Calls allowed per rolling hour across everyone (unlimited if unset) |
+| `MAX_CALL_SECONDS` | Cap on each call's length (600 if unset) |
+
+Re-running `setup-agent` replaces the PAL, so update `TAVUS_PAL_ID` on the host afterwards.
+
 ## Checks
 
 ```bash

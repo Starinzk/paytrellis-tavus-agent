@@ -11,6 +11,23 @@ let request = null;
 let frame = null;
 let inCall = false;
 let activityStarted = false;
+let accessCodeRequired = false;
+
+// The access code is only needed on a hosted demo; remember it for this tab.
+const savedCode = () => {
+  try {
+    return sessionStorage.getItem("demo-access-code") ?? "";
+  } catch {
+    return "";
+  }
+};
+const saveCode = (code) => {
+  try {
+    sessionStorage.setItem("demo-access-code", code);
+  } catch {
+    /* storage unavailable: the code just won't be remembered */
+  }
+};
 
 async function api(path, options = {}) {
   const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json" } });
@@ -87,14 +104,25 @@ function describeTool({ name, args, output }) {
 }
 
 async function startCall() {
+  const accessCode = $("access-code").value.trim();
+  if (accessCodeRequired && !accessCode) {
+    $("start-status").textContent = "Enter the access code from the email to start the call.";
+    $("access-code").focus();
+    return;
+  }
   $("start").disabled = true;
   $("start-status").textContent = "Connecting you to Paige…";
-  const { status, body } = await api(`/api/requests/${requestId}/call`, { method: "POST" });
+  const { status, body } = await api(`/api/requests/${requestId}/call`, {
+    method: "POST",
+    body: JSON.stringify({ accessCode }),
+  });
   if (status !== 200) {
     $("start-status").textContent = body.error ?? "The call couldn't start. Try again in a moment.";
     $("start").disabled = false;
+    if (status === 401) $("access-code").focus();
     return;
   }
+  if (accessCode) saveCode(accessCode);
 
   inCall = true;
   addActivity("Call started.");
@@ -141,6 +169,12 @@ window.addEventListener("pagehide", () => {
 });
 
 $("start").addEventListener("click", () => startCall().catch((e) => addActivity(e.message, true)));
+
+api("/api/config").then(({ body }) => {
+  accessCodeRequired = Boolean(body.accessCodeRequired);
+  $("access").hidden = !accessCodeRequired;
+  $("access-code").value = savedCode();
+});
 
 if (!requestId) {
   $("vendor").textContent = "No payment selected.";
