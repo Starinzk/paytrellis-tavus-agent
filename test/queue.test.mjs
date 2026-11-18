@@ -122,7 +122,7 @@ test("transcript renders speakers and escapes content", () => {
   assert.match(renderTranscript({ transcript: [], perception: null }), /isn't ready yet/);
 });
 
-test("a request with every detail confirmed but not submitted says so", () => {
+test("a payment with every detail confirmed but not yet released says so", () => {
   store.updateField("PR-1005", "invoiceNumber", "INV-8801");
-  assert.equal(problemSummary(store.get("PR-1005")), "Details confirmed, not yet submitted");
+  assert.equal(problemSummary(store.get("PR-1005")), "Details confirmed, payment not yet released");
 });

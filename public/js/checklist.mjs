@@ -1,5 +1,5 @@
-// Turns a payment request into the call page's comparison ledger:
-// what the customer submitted vs what was confirmed on the call, field by field.
+// Turns a payment into the call page's comparison ledger:
+// what the customer sent us vs what was confirmed on the call, field by field.
 // Pure so it can be tested in Node.
 
 export const FIELD_LABELS = {
