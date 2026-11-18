@@ -1,96 +1,105 @@
 // Customer call page: embeds the Tavus video call (Daily Prebuilt, which includes
 // the screen-share button), relays the agent's tool calls to our server, and keeps
-// the checklist in sync.
+// the comparison ledger in sync.
 import { handleToolCall } from "./tool-relay.mjs";
-import { renderChecklist, progress, outcome, FIELD_LABELS } from "./checklist.mjs";
+import { renderLedger, progress, outcome, ledgerRows, FIELD_LABELS, formatValue } from "./checklist.mjs";
 
-const params = new URLSearchParams(location.search);
-const requestId = params.get("request");
+const requestId = new URLSearchParams(location.search).get("request");
 const $ = (id) => document.getElementById(id);
 
 let request = null;
 let frame = null;
 let inCall = false;
+let activityStarted = false;
 
 async function api(path, options = {}) {
-  const res = await fetch(path, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
-  });
+  const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json" } });
   const body = await res.json().catch(() => ({}));
   return { status: res.status, body };
 }
 
-function money(n) {
-  return n == null ? "amount missing" : n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-}
-
 function addActivity(text, isError = false) {
+  if (!activityStarted) {
+    $("activity").innerHTML = "";
+    activityStarted = true;
+  }
   const li = document.createElement("li");
-  li.textContent = `${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })} · ${text}`;
+  const time = document.createElement("time");
+  time.textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+  li.append(time, text);
   if (isError) li.className = "error";
   $("activity").prepend(li);
 }
 
-function render(changedField) {
-  $("title").textContent = `${request.customer.name} → ${request.vendor.name}`;
-  $("meta").textContent = `Request ${request.id} · ${money(request.fields.amount.value)} · contact ${request.customer.contact}`;
-  $("checklist").innerHTML = renderChecklist(request);
+function listJoin(items) {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+}
 
+function render(justLocked = new Set()) {
+  const amount = formatValue("amount", request.fields.amount.value);
+  $("vendor").textContent = `Payment to ${request.vendor.name}`;
+  $("amount").textContent = amount ?? "Amount to confirm";
+  $("who").textContent = `From ${request.customer.name}, request ${request.id}`;
+
+  $("ledger").innerHTML = renderLedger(request, justLocked);
   const { done, total } = progress(request);
-  $("progress-label").textContent = total ? `${done} of ${total} details confirmed` : "No details flagged";
-  $("progress-bar").style.width = total ? `${(done / total) * 100}%` : "100%";
+  $("count").textContent = total ? `${done} of ${total} confirmed` : "Nothing to confirm";
+  $("meter").style.width = total ? `${(done / total) * 100}%` : "100%";
+
+  const needed = ledgerRows(request).filter((r) => r.state === "needs").map((r) => r.label.toLowerCase());
+  $("prep-title").textContent = `Let's get your payment to ${request.vendor.name} moving`;
+  $("prep-needed").textContent = needed.length
+    ? `We need to confirm the ${listJoin(needed)}. It usually takes about two minutes.`
+    : "Everything on this request is already confirmed.";
 
   const open = request.status === "needs_info" || request.status === "in_call";
-  const box = $("outcome");
-  box.hidden = request.status === "needs_info" || request.status === "in_call";
-  if (!box.hidden) {
-    const o = outcome(request);
-    box.className = `outcome ${o.tone}`;
-    box.querySelector("h2").textContent = o.title;
-    box.querySelector("p").textContent = request.reviewReason ? `${o.body} Reason: ${request.reviewReason}` : o.body;
+  // Show the outcome once the request is closed, or right after a call that left things open.
+  const endedUnresolved = request.status === "needs_info" && request.history?.at(-1)?.type === "call_ended_unresolved";
+  const o = !inCall && (!open || endedUnresolved) ? outcome(request) : null;
+  $("outcome").hidden = !o;
+  if (o) {
+    $("outcome").className = `outcome ${o.tone}`;
+    $("outcome").querySelector("h2").textContent = o.title;
+    $("outcome").querySelector("p").textContent = o.body;
   }
   $("start").disabled = !open || inCall;
+  $("start").textContent = request.history?.some((h) => h.type === "call_started") ? "Start another call" : "Start video call";
 
   if (request.demoInvoice) {
-    $("demo-invoice").hidden = false;
-    $("demo-invoice").querySelector("a").href = request.demoInvoice;
-  }
-
-  if (changedField) {
-    const row = document.querySelector(`[data-field="${changedField}"]`);
-    row?.classList.add("flash");
-    setTimeout(() => row?.classList.remove("flash"), 1500);
+    $("demo-invoice-wrap").hidden = false;
+    $("demo-invoice").href = request.demoInvoice;
   }
 }
 
 async function refresh(changedField) {
   const { status, body } = await api(`/api/requests/${requestId}`);
-  if (status !== 200) throw new Error(body.error ?? `Couldn't load request ${requestId}`);
+  if (status !== 200) throw new Error(body.error ?? `Couldn't load request ${requestId}.`);
   request = body;
-  render(changedField);
+  render(changedField ? new Set([changedField]) : undefined);
 }
 
-function describeTool({ name, args, status, output }) {
-  if (name === "update_field") return `${FIELD_LABELS[args.field] ?? args.field} → ${args.value}: ${output}`;
-  if (name === "complete_request") return `Submit request: ${output}`;
-  if (name === "send_to_review") return `Sent to review (${args.reason ?? "no reason"}): ${output}`;
+function describeTool({ name, args, output }) {
+  if (name === "update_field") return `${FIELD_LABELS[args.field] ?? args.field}: ${output}`;
+  if (name === "complete_request") return `Submitting the request. ${output}`;
+  if (name === "send_to_review") return `Sent to a team member. ${output}`;
   return `${name}: ${output}`;
 }
 
 async function startCall() {
   $("start").disabled = true;
-  $("start-status").textContent = "Starting the call…";
+  $("start-status").textContent = "Connecting you to Paige…";
   const { status, body } = await api(`/api/requests/${requestId}/call`, { method: "POST" });
   if (status !== 200) {
-    $("start-status").textContent = body.error ?? "Couldn't start the call.";
+    $("start-status").textContent = body.error ?? "The call couldn't start. Try again in a moment.";
     $("start").disabled = false;
     return;
   }
 
   inCall = true;
-  addActivity("Call started");
-  $("placeholder").hidden = true;
+  addActivity("Call started.");
+  $("prep").hidden = true;
+  $("start-status").textContent = "";
   frame = window.Daily.createFrame($("stage"), {
     iframeStyle: { width: "100%", height: "100%", border: "0" },
     showLeaveButton: true,
@@ -108,9 +117,8 @@ async function startCall() {
       },
     }),
   );
-
   frame.on("left-meeting", endCall);
-  frame.on("error", (e) => addActivity(`Call error: ${e?.errorMsg ?? "unknown"}`, true));
+  frame.on("error", (e) => addActivity(`Call problem: ${e?.errorMsg ?? "unknown error"}.`, true));
 
   await frame.join({ url: body.conversation_url });
   await refresh();
@@ -119,12 +127,11 @@ async function startCall() {
 async function endCall() {
   if (!inCall) return;
   inCall = false;
-  addActivity("Call ended");
+  addActivity("Call ended.");
   await api(`/api/requests/${requestId}/end-call`, { method: "POST" });
   frame?.destroy();
   frame = null;
-  $("placeholder").hidden = false;
-  $("start-status").textContent = "";
+  $("prep").hidden = false;
   await refresh();
 }
 
@@ -136,11 +143,12 @@ window.addEventListener("pagehide", () => {
 $("start").addEventListener("click", () => startCall().catch((e) => addActivity(e.message, true)));
 
 if (!requestId) {
-  $("title").textContent = "No payment request selected";
-  $("meta").innerHTML = 'Open a request from the <a href="/">ops queue</a>.';
+  $("vendor").textContent = "No payment selected.";
+  $("prep-needed").textContent = "Open this page from the link in your email.";
 } else {
   refresh().catch((e) => {
-    $("title").textContent = "Couldn't load this request";
-    $("meta").textContent = e.message;
+    $("vendor").textContent = "This payment couldn't be loaded.";
+    $("who").textContent = e.message;
+    $("prep-needed").textContent = "Check the link and try again.";
   });
 }

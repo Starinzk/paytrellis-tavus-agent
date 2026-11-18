@@ -3,56 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Paytrellis · Payment request call</title>
+<title>Confirm your payment details · Paytrellis</title>
 <link rel="stylesheet" href="/css/app.css">
-<link rel="icon" href="data:,">
+<link rel="icon" href="/img/mark.svg" type="image/svg+xml">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Paytrellis <small>a fictional payments company</small></div>
-    <nav><a href="/">Ops queue</a></nav>
+    <span class="logo"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 20 20 4M4 12l8-8M12 20l8-8M4 4l16 16M12 4l8 8M4 12l8 8"/><circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/></svg>Paytrellis</span>
+    <span class="context">Payment verification</span>
   </header>
 
-  <main class="call-layout">
-    <section class="stage" id="stage">
-      <div class="stage-placeholder" id="placeholder">
-        <h2>Payment request call</h2>
-        <p>Paige from Paytrellis will walk through the details that are holding up your payment. It takes about two minutes.</p>
-        <button class="btn" id="start" disabled>Start call</button>
-        <p class="muted" id="start-status"></p>
+  <main class="call">
+    <section class="stage" id="stage" aria-label="Video call">
+      <div class="prep" id="prep">
+        <h1 id="prep-title">Let's get your payment moving</h1>
+        <p id="prep-intro">Paige from Paytrellis will confirm a few details with you on a short video call.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span id="prep-needed">Loading what's needed…</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Have the invoice to hand, or be able to log in to the vendor's portal. You can share it on screen.</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Your browser will ask to use your camera and microphone.</span></li>
+        </ul>
+        <button class="btn large" id="start" disabled>Start video call</button>
+        <div class="status" id="start-status" role="status"></div>
+        <p class="fine">Paige will never ask for passwords, card numbers or your bank login.</p>
       </div>
     </section>
 
-    <aside class="panel">
-      <div>
-        <h1 id="title">Loading…</h1>
-        <div class="request-meta" id="meta"></div>
-      </div>
+    <aside class="side">
+      <section class="summary" aria-live="polite">
+        <div class="vendor" id="vendor">Loading payment…</div>
+        <div class="amount" id="amount"></div>
+        <div class="who" id="who"></div>
+      </section>
 
-      <div id="outcome" class="outcome" hidden><h2></h2><p></p></div>
+      <section class="outcome" id="outcome" hidden role="status"><h2></h2><p></p></section>
 
-      <div>
-        <div class="progress" id="progress-label"></div>
-        <div class="progress-bar"><span id="progress-bar" style="width:0%"></span></div>
-      </div>
+      <section class="ledger" aria-labelledby="ledger-title">
+        <div class="ledger-head">
+          <h2 id="ledger-title">Payment details</h2>
+          <span class="count" id="count"></span>
+        </div>
+        <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+        <table>
+          <thead><tr><th scope="col">Detail</th><th scope="col">Your request</th><th scope="col">Confirmed on call</th></tr></thead>
+          <tbody id="ledger"></tbody>
+        </table>
+      </section>
 
-      <ul class="checklist" id="checklist"></ul>
-
-      <div class="hint" id="share-hint">
-        <strong>Don't have the invoice details to hand?</strong> Paige can read them from your screen.
+      <details class="help">
+        <summary>How to share your screen</summary>
         <ol>
           <li>Log in to the vendor's portal yourself and open the invoice.</li>
-          <li>In the call, click <em>Share</em> and choose <em>Chrome Tab</em>.</li>
-          <li>Pick the invoice tab only, then tell Paige it's up.</li>
+          <li>In the call, click <strong>Share</strong> and choose <strong>Chrome Tab</strong>.</li>
+          <li>Pick only the invoice tab, then tell Paige it's up. It takes a few seconds to come through.</li>
         </ol>
-        <div id="demo-invoice" hidden style="margin-top:6px">Demo: <a target="_blank" rel="noopener">open the vendor's invoice</a></div>
-        <div style="margin-top:6px">Paige will never ask for passwords, card numbers or bank logins.</div>
-      </div>
+      </details>
 
-      <div>
-        <div class="muted" style="margin-bottom:4px">Activity</div>
-        <ul class="activity" id="activity"></ul>
-      </div>
+      <details class="help">
+        <summary>Call activity</summary>
+        <ul class="activity" id="activity"><li>Nothing yet.</li></ul>
+      </details>
+
+      <p class="demo-footer">Paytrellis is a fictional company. <span id="demo-invoice-wrap" hidden>For the demo, <a id="demo-invoice" target="_blank" rel="noopener">open the vendor's invoice</a> in a new tab. </span><a href="/">Back to the ops queue</a></p>
     </aside>
   </main>
 

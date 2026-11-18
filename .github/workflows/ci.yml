@@ -21,5 +21,8 @@ jobs:
       - name: Syntax check
         run: npm run check
 
+      - name: Lint
+        run: npm run lint
+
       - name: Tests
         run: npm test

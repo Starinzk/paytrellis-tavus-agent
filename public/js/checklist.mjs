@@ -1,82 +1,102 @@
-// Turns a payment request into checklist rows for the call page.
+// Turns a payment request into the call page's comparison ledger:
+// what the customer submitted vs what was confirmed on the call, field by field.
 // Pure so it can be tested in Node.
 
 export const FIELD_LABELS = {
   invoiceNumber: "Invoice number",
   amount: "Amount",
-  vendorAccount: "Vendor account number",
+  vendorAccount: "Vendor account",
   remitBank: "Remit-to bank",
-  remitAccount: "Remit-to account number",
-};
-
-const STATUS = {
-  missing: { label: "Missing", tone: "bad" },
-  suspect: { label: "Doesn't look right", tone: "warn" },
-  ok: { label: "On request", tone: "neutral" },
-  confirmed: { label: "Confirmed", tone: "good" },
-  changed: { label: "Changed: needs review", tone: "review" },
+  remitAccount: "Remit-to account",
 };
 
 export function formatValue(key, value) {
-  if (value == null || value === "") return "—";
+  if (value == null || value === "") return null;
   if (key === "amount") return Number(value).toLocaleString("en-US", { style: "currency", currency: "USD" });
   return String(value);
 }
 
-export function checklistRows(request) {
-  return Object.entries(request.fields).map(([key, field]) => {
-    const status = STATUS[field.status] ?? { label: field.status, tone: "neutral" };
-    const wasChanged = "previous" in field && field.previous !== field.value;
+// state: "needs" (to confirm), "locked" (confirmed), "flagged" (changed: a person will verify), "ok" (not flagged)
+export function ledgerRows(request) {
+  return Object.entries(request.fields).map(([key, f]) => {
+    const requested = formatValue(key, "requested" in f ? f.requested : f.value);
+    const current = formatValue(key, f.value);
+    const touched = f.status === "confirmed" || f.status === "changed";
+    const state =
+      f.status === "missing" || f.status === "suspect"
+        ? "needs"
+        : f.status === "confirmed"
+          ? "locked"
+          : f.status === "changed"
+            ? "flagged"
+            : "ok";
+    const tag = {
+      needs: { label: f.status === "missing" ? "Missing" : "Check this", tone: "hold" },
+      locked: { label: "Confirmed", tone: "confirmed" },
+      flagged: { label: "Team will verify", tone: "review" },
+      ok: null,
+    }[state];
     return {
       key,
       label: FIELD_LABELS[key] ?? key,
-      value: formatValue(key, field.value),
-      previous: wasChanged ? formatValue(key, field.previous) : null,
-      note: field.note ?? null,
-      statusLabel: status.label,
-      tone: status.tone,
-      needsAttention: field.status === "missing" || field.status === "suspect",
+      requested,
+      confirmed: touched ? current : null,
+      corrected: touched && current !== requested,
+      // "Missing" already says the field was blank, so only suspect and changed fields carry a note.
+      note: (f.status === "suspect" || state === "flagged") ? (f.note ?? null) : null,
+      state,
+      tag,
     };
   });
 }
 
 export function progress(request) {
-  const rows = Object.values(request.fields);
-  const flagged = rows.filter((f) => ["missing", "suspect"].includes(f.status) || "previous" in f);
-  const done = flagged.filter((f) => !["missing", "suspect"].includes(f.status));
-  return { done: done.length, total: flagged.length };
+  const rows = ledgerRows(request).filter((r) => r.state !== "ok");
+  return { done: rows.filter((r) => r.state !== "needs").length, total: rows.length };
 }
 
 export const OUTCOMES = {
-  completed: { title: "Payment request completed", body: "All details confirmed. The payment has been sent for processing.", tone: "good" },
-  approved: { title: "Approved by Paytrellis", body: "A team member approved this request.", tone: "good" },
-  in_review: { title: "Sent to a Paytrellis team member", body: "A person will verify the details before anything is paid.", tone: "review" },
-  rejected: { title: "Rejected", body: "A team member rejected this request.", tone: "bad" },
-  needs_info: { title: "Still open", body: "Some details still need confirming. You can start another call.", tone: "warn" },
-  in_call: { title: "On a call", body: "", tone: "neutral" },
+  completed: {
+    title: "You're all set",
+    body: "Every detail is confirmed and your payment is on its way to the vendor. You can close this page.",
+    tone: "confirmed",
+  },
+  approved: { title: "Approved", body: "A Paytrellis team member approved this payment.", tone: "confirmed" },
+  in_review: {
+    title: "A Paytrellis team member will verify this",
+    body: "We'll check the new details with the vendor before anything is paid, and email you once it's done. You can close this page.",
+    tone: "review",
+  },
+  rejected: { title: "Payment not sent", body: "A Paytrellis team member couldn't verify these details. They'll contact you directly.", tone: "danger" },
+  needs_info: {
+    title: "Some details still need confirming",
+    body: "Start another call whenever you're ready. Anything you confirmed has been saved.",
+    tone: "hold",
+  },
 };
 
 export function outcome(request) {
-  return OUTCOMES[request.status] ?? { title: request.status, body: "", tone: "neutral" };
+  return OUTCOMES[request.status] ?? null;
 }
 
 const escape = (s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-export function renderChecklist(request) {
-  return checklistRows(request)
-    .map(
-      (r) => `
-      <li class="row ${r.needsAttention ? "attention" : ""}" data-field="${r.key}">
-        <div class="row-main">
-          <span class="row-label">${escape(r.label)}</span>
-          <span class="pill ${r.tone}">${escape(r.statusLabel)}</span>
-        </div>
-        <div class="row-value">
-          ${r.previous ? `<s>${escape(r.previous)}</s> → ` : ""}<strong>${escape(r.value)}</strong>
-        </div>
-        ${r.note ? `<div class="row-note">${escape(r.note)}</div>` : ""}
-      </li>`,
-    )
+function cell(value, { corrected, blankText }) {
+  if (value == null) return `<span class="value blank">${escape(blankText)}</span>`;
+  return `<span class="value">${corrected ? "<strong>" : ""}${escape(value)}${corrected ? "</strong>" : ""}</span>`;
+}
+
+export function renderLedger(request, justLocked = new Set()) {
+  return ledgerRows(request)
+    .map((r) => {
+      const confirmedBlank = r.state === "ok" ? "No change needed" : "Waiting";
+      return `
+      <tr class="${r.state}${justLocked.has(r.key) ? " just-locked" : ""}" data-field="${r.key}">
+        <td><div class="field">${escape(r.label)}</div>${r.tag ? `<span class="tag ${r.tag.tone}">${escape(r.tag.label)}</span>` : ""}</td>
+        <td>${cell(r.requested, { corrected: false, blankText: "Left blank" })}${r.state === "needs" && r.note ? `<span class="note">${escape(r.note)}</span>` : ""}</td>
+        <td>${cell(r.confirmed, { corrected: r.corrected, blankText: confirmedBlank })}${r.state === "flagged" && r.note ? `<span class="note">${escape(r.note)}</span>` : ""}</td>
+      </tr>`;
+    })
     .join("");
 }

@@ -3,34 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Paytrellis · Ops queue</title>
+<title>Payments on hold · Paytrellis Operations</title>
 <link rel="stylesheet" href="/css/app.css">
-<link rel="icon" href="data:,">
+<link rel="icon" href="/img/mark.svg" type="image/svg+xml">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Paytrellis <small>a fictional payments company</small></div>
-    <nav><button class="btn small secondary" id="reset">Reset demo data</button></nav>
+    <a class="logo" href="/"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 20 20 4M4 12l8-8M12 20l8-8M4 4l16 16M12 4l8 8M4 12l8 8"/><circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/></svg>Paytrellis</a>
+    <span class="context">Operations</span>
+    <nav aria-label="Main"><a href="/" aria-current="page">Payments on hold</a></nav>
   </header>
 
   <main class="page">
     <div class="page-head">
       <div>
-        <h1>Payment requests on hold</h1>
-        <div class="muted" id="counts"></div>
+        <h1>Payments on hold</h1>
+        <p>Payment requests missing details or flagged as possibly wrong. Paige resolves most on a call; the rest wait for you here.</p>
       </div>
-      <div class="muted">Updates every few seconds</div>
     </div>
 
-    <div class="error-box" id="error" hidden></div>
+    <div class="error-box" id="error" hidden role="alert"></div>
 
-    <div class="card">
+    <div class="tabs" role="tablist" aria-label="Filter by status" id="tabs"></div>
+    <div class="sheet" id="queue-panel" role="tabpanel">
       <table class="queue">
         <thead>
-          <tr><th>Request</th><th>Customer</th><th>Amount</th><th>Status</th><th>Problems and changes</th><th>Actions</th></tr>
+          <tr><th scope="col">Request</th><th scope="col">Customer</th><th scope="col" class="num">Amount</th><th scope="col">Problem</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Actions</span></th></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
+    </div>
+
+    <div class="page-foot">
+      <span id="updated" aria-live="off"></span>
+      <button class="btn small secondary" id="reset">Reset demo data</button>
     </div>
   </main>
 
