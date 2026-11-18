@@ -141,7 +141,9 @@ test("transcript route returns the conversation without system messages", async 
 test("the call page and the Daily SDK it needs are served", async () => {
   const page = await fetch(`${base}/call.html`);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /\/vendor\/daily\.js/);
+  const html = await page.text();
+  assert.match(html, /\/vendor\/daily\.js/);
+  assert.match(html, /href="\/" class="demo-exit"/);
   const sdk = await fetch(`${base}/vendor/daily.js`);
   assert.equal(sdk.status, 200);
   assert.match((await sdk.text()).slice(0, 400), /Daily/);

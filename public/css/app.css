@@ -59,6 +59,9 @@ a { color: var(--brand); text-underline-offset: 2px; }
 .topbar nav a { color: #d6e3de; text-decoration: none; font-size: 14px; padding: 8px 12px; border-radius: 6px; }
 .topbar nav a[aria-current="page"] { background: #1d3d37; color: #fff; }
 .topbar nav a:hover { color: #fff; }
+/* Customers wouldn't see this: it only exists so the demo can return to the ops queue. */
+.topbar nav a.demo-exit { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #36504a; }
+.demo-tag { font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: #1d3d37; color: var(--mark); }
 
 /* Buttons */
 .btn { appearance: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; border-radius: var(--radius); padding: 10px 18px; font: 600 15px/1.2 var(--font); cursor: pointer; text-decoration: none; background: var(--brand); color: #fff; }
