@@ -83,7 +83,7 @@ export function problemSummary(request) {
   const list = issues(request);
   if (!list.length) {
     if (request.status === "in_review") return request.reviewReason ?? "Sent for review";
-    if (request.status === "needs_info") return "Details confirmed, not yet submitted";
+    if (request.status === "needs_info") return "Details confirmed, payment not yet released";
     return "";
   }
   return list.map((i, n) => `${n ? i.field.toLowerCase() : i.field} ${i.kind}`).join(", ");
@@ -161,7 +161,7 @@ function detailPanels(row, ui) {
       `<div class="panel"><h3>Portal update</h3><p style="margin:0">Written back to the portal as <strong>${done ? "ready to pay" : "failed"}</strong>.</p></div>`,
     );
   }
-  if (!left.length) left.push(`<div class="panel"><p class="muted" style="margin:0">Nothing flagged on this request.</p></div>`);
+  if (!left.length) left.push(`<div class="panel"><p class="muted" style="margin:0">Nothing flagged on this payment.</p></div>`);
 
   const right = [];
   if (row.canDecide) {
@@ -202,9 +202,9 @@ function detailPanels(row, ui) {
 }
 
 const EMPTY = {
-  review: "Nothing needs review. Requests Paige can't resolve on a call will appear here.",
-  info: "No requests are waiting on customer details.",
-  closed: "No closed requests yet.",
+  review: "Nothing needs review. Payments Paige can't resolve on a call will appear here.",
+  info: "No payments are waiting on customer details.",
+  closed: "No closed payments yet.",
 };
 
 export function renderQueue(requests, ui = {}) {

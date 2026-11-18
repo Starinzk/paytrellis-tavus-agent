@@ -40,7 +40,7 @@ function render(justLocked = new Set()) {
   const amount = formatValue("amount", request.fields.amount.value);
   $("vendor").textContent = `Payment to ${request.vendor.name}`;
   $("amount").textContent = amount ?? "Amount to confirm";
-  $("who").textContent = `From ${request.customer.name}, request ${request.id}`;
+  $("who").textContent = `From ${request.customer.name}, payment ${request.id}`;
 
   $("ledger").innerHTML = renderLedger(request, justLocked);
   const { done, total } = progress(request);
@@ -51,10 +51,10 @@ function render(justLocked = new Set()) {
   $("prep-title").textContent = `Let's get your payment to ${request.vendor.name} moving`;
   $("prep-needed").textContent = needed.length
     ? `We need to confirm the ${listJoin(needed)}. It usually takes about two minutes.`
-    : "Everything on this request is already confirmed.";
+    : "Everything on this payment is already confirmed.";
 
   const open = request.status === "needs_info" || request.status === "in_call";
-  // Show the outcome once the request is closed, or right after a call that left things open.
+  // Show the outcome once the payment is closed, or right after a call that left things open.
   const endedUnresolved = request.status === "needs_info" && request.history?.at(-1)?.type === "call_ended_unresolved";
   const o = !inCall && (!open || endedUnresolved) ? outcome(request) : null;
   $("outcome").hidden = !o;
@@ -74,14 +74,14 @@ function render(justLocked = new Set()) {
 
 async function refresh(changedField) {
   const { status, body } = await api(`/api/requests/${requestId}`);
-  if (status !== 200) throw new Error(body.error ?? `Couldn't load request ${requestId}.`);
+  if (status !== 200) throw new Error(body.error ?? `Couldn't load payment ${requestId}.`);
   request = body;
   render(changedField ? new Set([changedField]) : undefined);
 }
 
 function describeTool({ name, args, output }) {
   if (name === "update_field") return `${FIELD_LABELS[args.field] ?? args.field}: ${output}`;
-  if (name === "complete_request") return `Submitting the request. ${output}`;
+  if (name === "complete_request") return `Releasing the payment. ${output}`;
   if (name === "send_to_review") return `Sent to a team member. ${output}`;
   return `${name}: ${output}`;
 }

@@ -135,7 +135,7 @@ document.addEventListener("input", (event) => {
 });
 
 $("reset").addEventListener("click", async () => {
-  if (!confirm("Reset all demo payment requests to their starting state?")) return;
+  if (!confirm("Reset all demo payments to their starting state?")) return;
   for (const key of ["expanded", "verified"]) ui[key].clear();
   for (const key of ["notes", "transcripts", "errors"]) ui[key].clear();
   await api("/api/reset", { method: "POST" });

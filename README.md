@@ -1,13 +1,13 @@
-# Paytrellis payment-request agent
+# Paytrellis payment verification agent
 
-A Tavus Conversational Video Interface (CVI) agent for **Paytrellis, a fictional payments company** that pays vendor invoices for its business customers. When a payment request is incomplete or mistyped, the agent calls the customer, checks the request against the vendor's invoice on a shared screen, and either completes it or hands it to an ops staffer.
+A Tavus Conversational Video Interface (CVI) agent for **Paytrellis, a fictional payments company** that pays vendor invoices for its business customers. Paytrellis pays those invoices on its customers' behalf. When a payment can't be paid because a detail is missing or mistyped, it goes on hold. The agent meets the customer on a short call, checks the payment details against the vendor's invoice on a shared screen, and either releases the payment or hands it to an ops staffer.
 
 Built as a take-home project for the Tavus Customer Engineer role. All company names, people, invoices and account numbers are invented.
 
 ## Status
 
 - Screen-reading risk test: passed (all five invoice fields read correctly).
-- Payment-request data, business rules and server: done.
+- Payment data, business rules and server: done.
 - Agent setup (prompt, tools, guardrails, objective, call creation): done.
 - Call page with live checklist: done.
 - Ops queue with review, approve/reject and transcripts: done.
@@ -22,16 +22,16 @@ Built as a take-home project for the Tavus Customer Engineer role. All company n
 | Vendor portal | `vendor-portal/` | Fictional invoices the customer shares on screen |
 | Agent definition | `agent/definitions.mjs` | Prompt, Raven-2 screen perception, tools, guardrails, objective |
 | Agent setup | `agent/setup-agent.mjs` | Pushes the definition to Tavus; safe to re-run |
-| Call context | `lib/call-context.mjs` | Per-call greeting and context built from the request |
+| Call context | `lib/call-context.mjs` | Per-call greeting and context built from the payment |
 | Call page | `public/call.html`, `public/js/call.js` | Embeds the call (Daily Prebuilt, which has the screen-share button) and shows the live checklist |
 | Tool relay | `public/js/tool-relay.mjs` | Turns `conversation.tool_call` events into server calls and sends `conversation.tool_result` back |
-| Ops queue | `public/index.html`, `public/js/queue.mjs` | Requests on hold, what changed on each call, approve/reject for reviews, transcripts |
+| Ops queue | `public/index.html`, `public/js/queue.mjs` | Payments on hold, what changed on each call, approve/reject for reviews, transcripts |
 
 The rules that decide whether money moves are enforced in `lib/store.mjs`, not in the agent's prompt:
 
-- A request can't complete while any field is missing or flagged.
-- A remit-to bank or account that differs from the vendor's details on file is marked `changed`, and the request can then only go to an ops staffer for review.
-- Closed requests can't be changed by the agent.
+- A payment can't be released while any detail is missing or flagged.
+- A remit-to bank or account that differs from the vendor's details on file is marked `changed`, and the payment can then only go to an ops staffer for review.
+- Closed payments can't be changed by the agent.
 
 ## Setup
 
@@ -56,9 +56,9 @@ npm start             # http://localhost:3000 (ops queue); calls open from there
 
 - **Tools** (delivered to the call page as `conversation.tool_call` events, run against `lib/store.mjs`, returned as `conversation.tool_result`):
   - `update_field(field, value)`: saves a value after the customer confirms it out loud
-  - `complete_request()`: submits the request; the server refuses if any rule fails
-  - `send_to_review(reason)`: hands the request to an ops staffer
-- **Tool calls carry no request ID.** The call page knows which request it's for, so the agent can only ever change the request it's calling about.
+  - `complete_request()`: releases the payment to be paid; the server refuses if any rule fails
+  - `send_to_review(reason)`: hands the payment to an ops staffer
+- **Tool calls carry no payment ID.** The call page knows which payment it's for, so the agent can only ever change the payment it's calling about.
 - **Perception:** Raven-2 with screen questions about invoice fields. The post-call report is scoped to the invoice, because in the risk test the default report also described the person and their surroundings.
 - **Guardrails:** no credentials, no claiming a payment is complete unless the server said so, stay on task.
 - **Approving new bank details** requires the ops staffer to confirm they verified them with the vendor on a phone number already on file. The server enforces this, not just the page.
