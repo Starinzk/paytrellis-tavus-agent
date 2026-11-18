@@ -8,7 +8,7 @@
     "node": ">=20.6"
   },
   "scripts": {
-    "start": "node --env-file=.env server.mjs",
+    "start": "node server.mjs",
     "setup-agent": "node --env-file=.env agent/setup-agent.mjs",
     "check": "node scripts/check.mjs",
     "lint": "eslint .",

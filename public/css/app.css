@@ -93,6 +93,10 @@ a { color: var(--brand); text-underline-offset: 2px; }
 .prep li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
 .prep li svg { width: 18px; height: 18px; margin-top: 2px; color: var(--mark); }
 .prep .fine { font-size: 13px; color: #9fb6ae; margin-top: 14px; }
+.access { margin: 0 0 14px; }
+.access label { display: block; font-size: 13px; color: #c3d4ce; margin-bottom: 6px; }
+.access input { width: min(280px, 100%); font: 15px var(--font); padding: 10px 12px; border-radius: 8px; border: 1px solid #36504a; background: #13332d; color: #fff; }
+.access input::placeholder { color: #8aa59c; }
 .prep .status { min-height: 1.5em; font-size: 14px; color: #c3d4ce; margin-top: 12px; }
 
 .side { display: flex; flex-direction: column; gap: 16px; }
